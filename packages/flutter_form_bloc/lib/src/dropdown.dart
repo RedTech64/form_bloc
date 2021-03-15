@@ -618,7 +618,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 ///  * [DropdownMenuItem], the class used to represent the [items].
 ///  * [DropdownButtonHideUnderline], which prevents its descendant dropdown buttons
 ///    from displaying their underlines.
-///  * [RaisedButton], [FlatButton], ordinary buttons that trigger a single action.
+///  * [ElevatedButton], [TextButton], ordinary buttons that trigger a single action.
 ///  * <https://material.io/design/components/menus.html#dropdown-menu>
 class DropdownButton<T> extends StatefulWidget {
   /// Creates a dropdown button.
@@ -841,7 +841,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>>
         padding: _kMenuItemPadding.resolve(textDirection),
         selectedIndex: _selectedIndex ?? 0,
         elevation: widget.elevation,
-        theme: Theme.of(context, shadowThemeOnly: true),
+        theme: Theme.of(context),
         style: _textStyle,
         barrierLabel:
             MaterialLocalizations.of(context).modalBarrierDismissLabel,

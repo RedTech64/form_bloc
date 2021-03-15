@@ -142,7 +142,7 @@ class AnimatedBackground extends StatelessWidget {
               gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [animation["color1"], animation["color2"]])),
+                  colors: <Color>[animation["color1"], animation["color2"]])),
         );
       },
     );

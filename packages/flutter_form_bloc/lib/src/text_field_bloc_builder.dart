@@ -5,7 +5,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_bloc/src/can_show_field_bloc_builder.dart';
-import 'package:flutter_form_bloc/src/flutter_typeahead.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:flutter_form_bloc/src/utils/utils.dart';
 import 'package:form_bloc/form_bloc.dart';
 import 'package:flutter/widgets.dart';
@@ -15,7 +15,7 @@ export 'package:flutter/widgets.dart' show EditableText;
 export 'package:flutter/services.dart'
     show TextInputType, TextInputAction, TextCapitalization;
 
-export 'package:flutter_form_bloc/src/flutter_typeahead.dart'
+export 'package:flutter_typeahead/flutter_typeahead.dart'
     show SuggestionsBoxDecoration;
 
 const double _kMenuItemHeight = 48.0;
@@ -750,7 +750,7 @@ class _TextFieldBlocBuilderState extends State<TextFieldBlocBuilder> {
       animate: widget.animateWhenCanShow,
       builder: (_, __) {
         return BlocBuilder<TextFieldBloc, TextFieldBlocState>(
-          cubit: widget.textFieldBloc,
+          bloc: widget.textFieldBloc,
           builder: (context, state) {
             final isEnabled = fieldBlocIsEnabled(
               isEnabled: widget.isEnabled,
@@ -828,7 +828,7 @@ class _TextFieldBlocBuilderState extends State<TextFieldBlocBuilder> {
       {@required TextFieldBlocState state, @required bool isEnabled}) {
     return widgetBasedOnPlatform(
       mobile: TypeAheadField<String>(
-        textFieldConfiguration: TextFieldConfiguration<String>(
+        textFieldConfiguration: TextFieldConfiguration(
           controller: _controller,
           decoration: _buildDecoration(state),
           keyboardType: widget.keyboardType,
@@ -870,20 +870,11 @@ class _TextFieldBlocBuilderState extends State<TextFieldBlocBuilder> {
           keyboardAppearance: widget.keyboardAppearance,
           scrollPadding: widget.scrollPadding,
           focusNode: _effectiveFocusNode,
-          buildCounter: widget.buildCounter,
-          dragStartBehavior: widget.dragStartBehavior,
           enableInteractiveSelection: widget.enableInteractiveSelection,
           enableSuggestions: widget.enableSuggestions,
-          expands: widget.expands,
-          readOnly: widget.readOnly,
-          scrollController: widget.scrollController,
-          scrollPhysics: widget.scrollPhysics,
-          showCursor: widget.showCursor,
-          strutStyle: widget.strutStyle,
-          textAlignVertical: widget.textAlignVertical,
-          toolbarOptions: widget.toolbarOptions,
+          onTap: widget.onTap,
         ),
-        onTap: widget.onTap,
+        hideKeyboard: widget.readOnly,
         hideOnLoading: widget.hideOnLoadingSuggestions,
         hideOnEmpty: widget.hideOnEmptySuggestions,
         hideOnError: widget.hideOnSuggestionsError,
@@ -925,7 +916,6 @@ class _TextFieldBlocBuilderState extends State<TextFieldBlocBuilder> {
         keepSuggestionsOnLoading: widget.keepSuggestionsOnLoading,
         keepSuggestionsOnSuggestionSelected: false,
         hideSuggestionsOnKeyboardHide: true,
-        showSuggestionsWhenIsEmpty: widget.showSuggestionsWhenIsEmpty,
         getImmediateSuggestions: widget.getImmediateSuggestions,
         debounceDuration: widget.debounceSuggestionDuration,
         suggestionsCallback: state.suggestions,
@@ -954,17 +944,11 @@ class _TextFieldBlocBuilderState extends State<TextFieldBlocBuilder> {
           _onSubmitted(value);
         },
         animationDuration: widget.suggestionsAnimationDuration,
-        removeSuggestionOnLongPress: widget.removeSuggestionOnLongPress,
         suggestionsBoxDecoration: widget.suggestionsBoxDecoration ??
             SuggestionsBoxDecoration(
               borderRadius: BorderRadius.circular(4),
               color: Theme.of(context).canvasColor,
             ),
-        onSuggestionRemoved: (suggestion) {
-          if (widget.removeSuggestionOnLongPress) {
-            widget.textFieldBloc.selectSuggestion(suggestion);
-          }
-        },
       ),
       other: TextField(
         controller: _controller,
@@ -990,7 +974,7 @@ class _TextFieldBlocBuilderState extends State<TextFieldBlocBuilder> {
         minLines: widget.minLines,
         maxLines: widget.maxLines,
         maxLength: widget.maxLength,
-        maxLengthEnforced: widget.maxLengthEnforced,
+        maxLengthEnforcement: widget.maxLengthEnforced ? MaxLengthEnforcement.enforced : MaxLengthEnforcement.none,
         onChanged: (value) {
           widget.textFieldBloc.updateValue(value);
           if (widget.onChanged != null) {

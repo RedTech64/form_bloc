@@ -110,15 +110,6 @@ class _DropdownFieldBlocBuilderMobileState<Value>
     });
 
     _effectiveFocusNode.addListener(_onFocusRequest);
-
-    _isKeyboardVisible = KeyboardVisibility.isVisible;
-
-    _keyboardSubscription = KeyboardVisibility.onChange.listen((bool visible) {
-      setState(() {
-        _isKeyboardVisible = visible;
-        print(_isKeyboardVisible);
-      });
-    });
   }
 
   @override
@@ -141,104 +132,109 @@ class _DropdownFieldBlocBuilderMobileState<Value>
       return Container();
     }
 
-    return Focus(
-      focusNode: _effectiveFocusNode,
-      child: BlocBuilder<SelectFieldBloc<Value, dynamic>,
-          SelectFieldBlocState<Value, dynamic>>(
-        cubit: widget.selectFieldBloc,
-        builder: (context, fieldState) {
-          final isEnabled = fieldBlocIsEnabled(
-            isEnabled: widget.isEnabled,
-            enableOnlyWhenFormBlocCanSubmit:
-                widget.enableOnlyWhenFormBlocCanSubmit,
-            fieldBlocState: fieldState,
-          );
+    return KeyboardVisibilityBuilder(
+      builder: (context, keyboardVisibility) {
+        _isKeyboardVisible = keyboardVisibility;
+        return Focus(
+          focusNode: _effectiveFocusNode,
+          child: BlocBuilder<SelectFieldBloc<Value, dynamic>,
+              SelectFieldBlocState<Value, dynamic>>(
+            bloc: widget.selectFieldBloc,
+            builder: (context, fieldState) {
+              final isEnabled = fieldBlocIsEnabled(
+                isEnabled: widget.isEnabled,
+                enableOnlyWhenFormBlocCanSubmit:
+                    widget.enableOnlyWhenFormBlocCanSubmit,
+                fieldBlocState: fieldState,
+              );
 
-          final decoration = _buildDecoration(context, fieldState, isEnabled);
-          String text = fieldState.value != null
-              ? widget.itemBuilder(context, fieldState.value)
-              : '';
-          return DefaultFieldBlocBuilderPadding(
-            padding: widget.padding,
-            child: Stack(
-              fit: StackFit.passthrough,
-              children: <Widget>[
-                DropdownButtonHideUnderline(
-                  child: Container(
-                    height: _dropdownHeight,
-                    child: DropdownButton<Value>(
-                      callOnPressed: _onPressedController.stream,
-                      value: fieldState.value,
-                      disabledHint: fieldState.value != null
-                          ? widget.itemBuilder(context, fieldState.value)
-                          : widget.decoration.hintText != null
-                              ? widget.decoration.hintText
-                              : null,
-                      onChanged: fieldBlocBuilderOnChange<Value>(
-                        isEnabled: isEnabled,
-                        nextFocusNode: widget.nextFocusNode,
-                        onChanged: (value) {
-                          widget.selectFieldBloc.updateValue(value);
-                          FocusScope.of(context).requestFocus(FocusNode());
+              final decoration = _buildDecoration(context, fieldState, isEnabled);
+              String text = fieldState.value != null
+                  ? widget.itemBuilder(context, fieldState.value)
+                  : '';
+              return DefaultFieldBlocBuilderPadding(
+                padding: widget.padding,
+                child: Stack(
+                  fit: StackFit.passthrough,
+                  children: <Widget>[
+                    DropdownButtonHideUnderline(
+                      child: Container(
+                        height: _dropdownHeight,
+                        child: DropdownButton<Value>(
+                          callOnPressed: _onPressedController.stream,
+                          value: fieldState.value,
+                          disabledHint: fieldState.value != null
+                              ? widget.itemBuilder(context, fieldState.value)
+                              : widget.decoration.hintText != null
+                                  ? widget.decoration.hintText
+                                  : null,
+                          onChanged: fieldBlocBuilderOnChange<Value>(
+                            isEnabled: isEnabled,
+                            nextFocusNode: widget.nextFocusNode,
+                            onChanged: (value) {
+                              widget.selectFieldBloc.updateValue(value);
+                              FocusScope.of(context).requestFocus(FocusNode());
+                            },
+                          ),
+                          items: fieldState.items.isEmpty
+                              ? null
+                              : _buildItems(fieldState.items),
+                        ),
+                      ),
+                    ),
+                    InputDecorator(
+                      decoration: decoration,
+                      textAlign: widget.textAlign,
+                      isEmpty:
+                          fieldState.value == null && decoration.hintText == null,
+                      child: Builder(
+                        builder: (context) {
+                          final height = InputDecorator.containerOf(context)
+                              ?.constraints
+                              ?.maxHeight;
+
+                          if (height == null ||
+                              height != _dropdownHeight ||
+                              height == 0) {
+                            _dropdownHeightController.add(height);
+                          }
+                          if (fieldState.value == null &&
+                              decoration.hintText != null) {
+                            return Text(
+                              decoration.hintText,
+                              style: decoration.hintStyle,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: widget.textAlign,
+                              maxLines: decoration.hintMaxLines,
+                            );
+                          }
+                          return Text(
+                            text,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            softWrap: true,
+                            style: Style.getDefaultTextStyle(
+                              context: context,
+                              isEnabled: isEnabled,
+                            ),
+                          );
                         },
                       ),
-                      items: fieldState.items.isEmpty
-                          ? null
-                          : _buildItems(fieldState.items),
                     ),
-                  ),
+                    InkWell(
+                      onTap: isEnabled ? _onDropdownPressed : null,
+                      onLongPress: isEnabled ? _onDropdownPressed : null,
+                      customBorder: decoration.border ??
+                          Theme.of(context).inputDecorationTheme.border,
+                      child: Container(height: _dropdownHeight),
+                    ),
+                  ],
                 ),
-                InputDecorator(
-                  decoration: decoration,
-                  textAlign: widget.textAlign,
-                  isEmpty:
-                      fieldState.value == null && decoration.hintText == null,
-                  child: Builder(
-                    builder: (context) {
-                      final height = InputDecorator.containerOf(context)
-                          ?.constraints
-                          ?.maxHeight;
-
-                      if (height == null ||
-                          height != _dropdownHeight ||
-                          height == 0) {
-                        _dropdownHeightController.add(height);
-                      }
-                      if (fieldState.value == null &&
-                          decoration.hintText != null) {
-                        return Text(
-                          decoration.hintText,
-                          style: decoration.hintStyle,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: widget.textAlign,
-                          maxLines: decoration.hintMaxLines,
-                        );
-                      }
-                      return Text(
-                        text,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        softWrap: true,
-                        style: Style.getDefaultTextStyle(
-                          context: context,
-                          isEnabled: isEnabled,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                InkWell(
-                  onTap: isEnabled ? _onDropdownPressed : null,
-                  onLongPress: isEnabled ? _onDropdownPressed : null,
-                  customBorder: decoration.border ??
-                      Theme.of(context).inputDecorationTheme.border,
-                  child: Container(height: _dropdownHeight),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
+              );
+            },
+          ),
+        );
+      }
     );
   }
 

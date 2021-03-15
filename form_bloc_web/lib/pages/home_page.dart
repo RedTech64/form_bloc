@@ -67,7 +67,7 @@ class HomePage extends StatelessWidget {
                 Container(
                   height: 50,
                   width: 250,
-                  child: FlatButton(
+                  child: TextButton(
                     onPressed: () => Navigator.of(context)
                         .pushReplacementNamed(RouteNames.simple_example),
                     child: Container(
@@ -81,14 +81,6 @@ class HomePage extends StatelessWidget {
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
                         ),
-                      ),
-                    ),
-                    color: Colors.black38,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      side: BorderSide(
-                        width: 2,
-                        color: Colors.white,
                       ),
                     ),
                   ),

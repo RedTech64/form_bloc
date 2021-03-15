@@ -78,7 +78,7 @@ class _TutorialStepperScreenState extends State<TutorialStepperScreen> {
                         currentStep < widget.steps.length - 1)
                       SizedBox(width: 16.0),
                     if (currentStep > 0)
-                      FlatButton(
+                      TextButton(
                         onPressed: onStepCancel,
                         child: const Text('PREVIOUS'),
                       ),
